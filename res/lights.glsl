@@ -26,8 +26,8 @@ uniform LightParametrs Light[MaxLight] = LightParametrs[MaxLight]
 			vec4 (1.0,1.0,1.0,1.0),
 			vec4 (0.0,0.0,1.0,1.0),
 			vec3 (0.0,0.0,-1.0),
-			2.0,
-			50.0,
+			180.0,
+			0.0,
 			0.2,
 			0.1,
 			0.0
@@ -630,27 +630,31 @@ float Geomoetric(const float x)
 	return (10000.0-(1/((x-1.01)*(x-1.01))))/9999.0197;
 }
 
-vec4 StraussDirectionalLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,float s,float m,float t)
+vec4 StraussDirectionalLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,const vec4 specular,float s,float m,float t)
 {
-	float NdotL = max( dot( normal,Light[number].position.xyz), 0.0);
+	float NdotL = dot( normal,Light[number].position.xyz);
 	vec3 Eye = normalize(EyePosition.xyz-position);
-	float NdotE = max( dot(normal,Eye),0.0);
-	if(NdotL>0 && NdotE>0)
+	float NdotE = dot(normal,Eye);
+	if(NdotL>0)
 	{
-		float r = 1.0-t-(1-s*s*s)*(1-t);
-		float FersnelNdotL = Fersnel(NdotL);
-		float Ref=min(1.0,r+FersnelNdotL*Geomoetric(NdotL)*Geomoetric(NdotE)*(r+0.1));
+		const float pi2 = 1.5707963267948966192313216916398;
+		float sm = s*s*s;
+		float r = 1.0-t-(1-sm)*(1-t);
+		//float FersnelNdotL = Fersnel(NdotL/(pi/2));
+		float Ref=min(1.0,r+Fersnel(NdotL/pi2)*Geomoetric(NdotL/pi2)*Geomoetric(NdotE/pi2)*(r+0.1));
 		vec3 R=-reflect(Light[number].position.xyz,normal);
 		float RdotE=max(dot(R,Eye),0.0);
-		vec3 Cs=vec3(1.0,1.0,1.0)+m*(1-NdotL)*(diffuse.xyz-vec3(1.0,1.0,1.0));
-		vec4 I = vec4(NdotL*(1-m*s)*(1-s*s*s)*(1-t)*diffuse.xyz + pow(NdotE,3/(1-s))*R*Cs,1.0);
+		vec3 Cs=vec3(1.0,1.0,1.0)+m*(1-Fersnel(NdotL/(pi/2)))*(Light[number].specular.rgb*specular.rgb-vec3(1.0,1.0,1.0));
+		vec3 D = NdotL*(1-m*s)*(1-sm)*(1-t)*Light[number].diffuse.rgb*diffuse.rgb;
+		vec3 S = max( vec3( 0.0 ), Cs * Ref * pow( dot( R, Eye ), 3.0 / (1.0 - s) ) );
+		vec4 I = vec4(2.5*D + 1.5*S,1.0);
 		return I;
 	}
 	else
 		return vec4(0.0,0.0,0.0,1.0);
 }
 
-vec4 StraussPointLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,vec4 ambient,float s,float m,float t)
+vec4 StraussPointLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,vec4 ambient,const vec4 specular,float s,float m,float t)
 {
 	vec3 LV=Light[number].position.xyz-position;
 
@@ -675,7 +679,8 @@ vec4 StraussPointLight(const int number,const vec3 position, const vec3 normal,c
 		return vec4(0.0,0.0,0.0,1.0);	
 }
 
-vec4 StraussSpotLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,vec4 ambient,float s,float m,float t)
+
+vec4 StraussSpotLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,vec4 ambient,const vec4 specular,float s,float m,float t)
 {
 	vec3 LV=Light[number].position.xyz-position;
 
@@ -707,16 +712,16 @@ vec4 StraussSpotLight(const int number,const vec3 position, const vec3 normal,co
 		return vec4(0.0,0.0,0.0,1.0);	
 }
 
-vec4 StraussLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,const vec4 ambient,vec4 emmision,float s,float m,float t)
+vec4 StraussLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,const vec4 ambient,vec4 emmision,const vec4 specular,float s,float m,float t)
 {
 	if(Light[number].position.w==0.0)
-		return GlobalAmbientLight(ambient) + LocalAmbientLight(number,ambient) + StraussDirectionalLight(number,position,normal,diffuse,s,m,t) + emmision;
+		return GlobalAmbientLight(ambient) + LocalAmbientLight(number,ambient) + StraussDirectionalLight(number,position,normal,diffuse,specular,s,m,t) + emmision;
 	else
 	{
 		if(Light[number].SpotCuttof==180.0)
-			return GlobalAmbientLight(ambient) + StraussPointLight(number,position,normal,diffuse,ambient,s,m,t) + emmision;
+			return GlobalAmbientLight(ambient) + StraussPointLight(number,position,normal,diffuse,ambient,specular,s,m,t) + emmision;
 		else
-			return GlobalAmbientLight(ambient) + StraussSpotLight(number,position,normal,diffuse,ambient,s,m,t) + emmision;
+			return GlobalAmbientLight(ambient) + StraussSpotLight(number,position,normal,diffuse,ambient,specular,s,m,t) + emmision;
 	}
 }
 

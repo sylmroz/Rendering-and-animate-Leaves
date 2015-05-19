@@ -15,7 +15,7 @@ vec4 CookTorranceGaussLight(const int number,const vec3 position, const vec3 nor
 
 vec4 OrenNayarLighting(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,const vec4 ambient,vec4 emmision,float sigma);
 
-vec4 StraussLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,const vec4 ambient,vec4 emmision,float s,float m,float t);
+vec4 StraussLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,const vec4 ambient,vec4 emmision,const vec4 specular,float s,float m,float t);
 
 in vec3 inoutPosition;
 in vec3 inoutNormal;
@@ -34,7 +34,7 @@ void main()
                 76.8
 			);
 	if(gl_FrontFacing==true)
-		outColor = StraussLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.emmision,0.6,0.9,0);
+		outColor = StraussLight(0,inoutPosition,normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,1.0-mat.shinnes/128.0,mat.shinnes/128.0,0.1);
 	else
-		outColor = StraussLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.emmision,0.6,0.9,0);
+		outColor = StraussLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,1.0-mat.shinnes/128.0f,mat.shinnes/128.0f,0.0);
 }
