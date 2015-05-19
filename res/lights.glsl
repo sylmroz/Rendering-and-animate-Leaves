@@ -665,13 +665,17 @@ vec4 StraussPointLight(const int number,const vec3 position, const vec3 normal,c
 	float NdotE = max(dot(normal,Eye),0.0);
 	if(NdotL>0 && NdotE>0)
 	{
-		float r = 1.0-t-(1-s*s*s)*(1-t);
-		float FersnelNdotL = Fersnel(NdotL);
-		float Ref=min(1.0,r+FersnelNdotL*Geomoetric(NdotL)*Geomoetric(NdotE)*(r+0.1));
-		vec3 R=-reflect(LV,normal);
+		const float pi2 = 1.5707963267948966192313216916398;
+		float sm = s*s*s;
+		float r = 1.0-t-(1-sm)*(1-t);
+		//float FersnelNdotL = Fersnel(NdotL/(pi/2));
+		float Ref=min(1.0,r+Fersnel(NdotL/pi2)*Geomoetric(NdotL/pi2)*Geomoetric(NdotE/pi2)*(r+0.1));
+		vec3 R=-reflect(Light[number].position.xyz,normal);
 		float RdotE=max(dot(R,Eye),0.0);
-		vec3 Cs=vec3(1.0,1.0,1.0)+m*(1-NdotL)*(diffuse.xyz-vec3(1.0,1.0,1.0));
-		vec4 I = vec4(NdotL*(1-m*s)*(1-s*s*s)*(1-t)*diffuse.xyz + pow(NdotE,3/(1-s))*R*Cs,1.0);
+		vec3 Cs=vec3(1.0,1.0,1.0)+m*(1-Fersnel(NdotL/(pi/2)))*(Light[number].specular.rgb*specular.rgb-vec3(1.0,1.0,1.0));
+		vec3 D = NdotL*(1-m*s)*(1-sm)*(1-t)*Light[number].diffuse.rgb*diffuse.rgb;
+		vec3 S = max( vec3( 0.0 ), Cs * Ref * pow( dot( R, Eye ), 3.0 / (1.0 - s) ) );
+		vec4 I = vec4(2.5*D + 1.5*S,1.0);
 		float att = 1/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
 		return att * (LocalAmbientLight(number,ambient) + I);
 	}
@@ -694,14 +698,17 @@ vec4 StraussSpotLight(const int number,const vec3 position, const vec3 normal,co
 		float spot = dot(Light[number].SpotDirection,-LV);
 		if(spot>cos(radians(Light[number].SpotCuttof)))
 		{
-			float r = 1.0-t-(1-s*s*s)*(1-t);
-			float FersnelNdotL = Fersnel(NdotL);
-			float Ref=min(1.0,r+FersnelNdotL*Geomoetric(NdotL)*Geomoetric(NdotE)*(r+0.1));
-			vec3 R=-reflect(LV,normal);
+			const float pi2 = 1.5707963267948966192313216916398;
+			float sm = s*s*s;
+			float r = 1.0-t-(1-sm)*(1-t);
+			//float FersnelNdotL = Fersnel(NdotL/(pi/2));
+			float Ref=min(1.0,r+Fersnel(NdotL/pi2)*Geomoetric(NdotL/pi2)*Geomoetric(NdotE/pi2)*(r+0.1));
+			vec3 R=-reflect(Light[number].position.xyz,normal);
 			float RdotE=max(dot(R,Eye),0.0);
-			vec3 Cs=vec3(1.0,1.0,1.0)+m*(1-NdotL)*(diffuse.xyz-vec3(1.0,1.0,1.0));
-			vec4 I = vec4(NdotL*(1-m*s)*(1-s*s*s)*(1-t)*diffuse.xyz + pow(NdotE,3/(1-s))*R*Cs,1.0);
-			spot = pow(spot,Light[number].SpotExponent);
+			vec3 Cs=vec3(1.0,1.0,1.0)+m*(1-Fersnel(NdotL/(pi/2)))*(Light[number].specular.rgb*specular.rgb-vec3(1.0,1.0,1.0));
+			vec3 D = NdotL*(1-m*s)*(1-sm)*(1-t)*Light[number].diffuse.rgb*diffuse.rgb;
+			vec3 S = max( vec3( 0.0 ), Cs * Ref * pow( dot( R, Eye ), 3.0 / (1.0 - s) ) );
+			vec4 I = vec4(2.5*D + 1.5*S,1.0);
 			float att = spot/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
 			return att * (LocalAmbientLight(number,ambient) + I);
 		}
