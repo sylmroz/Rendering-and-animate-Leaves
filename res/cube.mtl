@@ -1,0 +1,7 @@
+newmtl bump
+Ka 0.0 0.2 0.6 1.0
+Kd 1.0 0.5 1.0 1.0
+Ks 0.2 0.5 0.1 1.0
+map_bump lenna.png
+newmtl dip
+map_Ka lula.png
