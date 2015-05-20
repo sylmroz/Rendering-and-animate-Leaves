@@ -17,6 +17,8 @@ vec4 OrenNayarLighting(const int number,const vec3 position, const vec3 normal,c
 
 vec4 StraussLight(const int number,const vec3 position, const vec3 normal,const vec4 diffuse,const vec4 ambient,vec4 emmision,const vec4 specular,float s,float m,float t);
 
+vec4 WardIzotropicLight(const int number,const vec3 position,const vec3 normal,const vec4 diffuse,const vec4 specular,const vec4 ambient,const vec4 emmision,const float sigma);
+
 in vec3 inoutPosition;
 in vec3 inoutNormal;
 
@@ -33,8 +35,12 @@ void main()
                 vec4( 0.727811, 0.626959, 0.626959, 0.550000 ),
                 76.8
 			);
-	if(gl_FrontFacing==true)
+	/*if(gl_FrontFacing==true)
 		outColor = StraussLight(0,inoutPosition,normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,1.0-mat.shinnes/128.0,mat.shinnes/128.0,0.1);
 	else
-		outColor = StraussLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,1.0-mat.shinnes/128.0f,mat.shinnes/128.0f,0.0);
+		outColor = StraussLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,1.0-mat.shinnes/128.0f,mat.shinnes/128.0f,0.0);*/
+	if(gl_FrontFacing==true)
+		outColor = WardIzotropicLight(0,inoutPosition,normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,mat.shinnes/128.0);
+	else
+		outColor = WardIzotropicLight(0,inoutPosition,-normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,mat.shinnes/128.0f);
 }
