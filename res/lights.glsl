@@ -815,6 +815,23 @@ vec4 WardIzotropicLight(const int number,const vec3 position,const vec3 normal,c
 }
 
 
+vec4 AskhminShirleyIzotropicDirectionalLight(const int number,const vec3 position,const vec3 normal, const vec4 diffuse,const vec4 specular,const vec4 Rd,const vec4 Rs, const float n)
+{
+	float NdotL=max(dot(normal,Light[number].position),0.0);
+	if(NdotL>0)
+	{
+		vec3 Eye = normalize(EyePosition.xyz-position);
+		vec3 H = normalize(Light[number].position.xyz+Eye);
+		float NdotH = max(dot(normal,H),0.0);
+		float NdotE = max(dot(normal,Eye),0.0);
+		vec3 F = Rs.rgb + pow((1 - NdotL),5)*(vec3(1.0)-Rs.rgb);
+		vec4 f4 = vec4(F,Rs.a);
+		vec4 Is = (((n+1)*pow(NdotH,n))/(8*pi*max(NdotL,NdotE)))*f4;
+		vec3 Id = ((28*Rd)/(23*pi))*(vec4(vec3(1.0)-Rs.rgb,Rs.a)*(1-pow(1-NdotL/2),5.0)*(1-pow(1-NdotE/2),5.0));
+		return NdotL*Light[number].diffuse*diffuse*Id + Is*Light[number].specular*specular*Is;
+	}
+}
+
 
 
 
