@@ -50,6 +50,7 @@ int main()
 	//std::vector<glm::vec3> p;
 	//MatLoader mat("./res/materal.mat");
 	Mesh obj("./res/uchati.obj");
+	
 	//OBJLoader object("./res/teapot.obj");
 	/*Interpolations *inter=new Langrage;
 	Hermite H;
@@ -147,7 +148,7 @@ int main()
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(modelView3x3));
 		glm::mat4 mvinv = glm::inverse(v*m);
 		//Eye = mvinv*Eye;
-		glm::vec4 LightPosition = glm::vec4(0.0f, 0.0f, 6.0f,0.0f);
+		glm::vec4 LightPosition = glm::vec4(6.0f, 6.0f, 6.0f,0.0f);
 		//LightPosition = mvinv*LightPosition;
 		//LightPosition = glm::normalize(LightPosition);
 
