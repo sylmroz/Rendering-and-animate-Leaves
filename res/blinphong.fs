@@ -21,7 +21,11 @@ vec4 StraussLight(const int number,const vec3 position, const vec3 normal,const 
 vec4 WardIzotropicLight(const int number,const vec3 position,const vec3 normal,const vec4 diffuse,const vec4 specular,const vec4 ambient,const vec4 emmision,const float sigma);
 
 
-vec4 WardAnizotropicSpotLight(const int number, const vec3 position, const vec3 tangent, const vec3 bitangent, const vec3 normal, const vec4 diffuse, const vec4 specular, const vec4 ambient,const vec4 emmision, const float sigmax, const float sigmay);
+vec4 WardAnizotropicLight(const int number, const vec3 position, const vec3 tangent, const vec3 bitangent, const vec3 normal, const vec4 diffuse, const vec4 specular, const vec4 ambient,const vec4 emmision, const float sigmax, const float sigmay);
+
+vec4 AskikhmininShirleyIzotropidLight(const int number, const vec3 position, const vec3 normal, const vec4 diffuse, const vec4 specular, const vec4 ambient,const vec4 emmision,const float Rd, const float Rs, const float n);
+
+vec4 AskikhmininShirleyAnizotropidLight(const int number, const vec3 position, const vec3 normal,const vec3 tangent, const vec3 bitangent, const vec4 diffuse, const vec4 specular,const vec4 ambient,const vec4 emmision, const float Rd, const float Rs, const float nx, const float ny);
 
 in vec3 inoutPosition;
 in vec3 inoutNormal;
@@ -44,24 +48,33 @@ void main()
 	tangent -= NdotT*normal;
 	tangent = normalize(tangent);
 	vec3 bitangent = cross(tangent,normal);
-	/*if(gl_FrontFacing==true)
-		outColor = StraussLight(0,inoutPosition,normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,1.0-mat.shinnes/128.0,mat.shinnes/128.0,0.1);
-	else
-		outColor = StraussLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,1.0-mat.shinnes/128.0f,mat.shinnes/128.0f,0.0);*/
-	/*if(gl_FrontFacing==true)
-		outColor = WardIzotropicLight(0,inoutPosition,normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,mat.shinnes/128.0);
-	else
-		outColor = WardIzotropicLight(0,inoutPosition,-normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,mat.shinnes/128.0f);*/
-	/*if(gl_FrontFacing==true)
-		outColor = WardAnizotropicSpotLight(0,inoutPosition,tangent,bitangent,normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.25+mat.shinnes/128.0,0.05+mat.shinnes/128.0);
-	else
-		outColor = WardAnizotropicSpotLight(0,inoutPosition,tangent,bitangent,-normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.25+mat.shinnes/128.0,0.05+mat.shinnes/128.0);*/
-
 
 	if(gl_FrontFacing==true)
+		outColor = AskikhmininShirleyAnizotropidLight(0,inoutPosition,normal,tangent,bitangent, mat.diffuse, mat.specular, mat.ambient, mat.emmision, 0.75,0.25, mat.shinnes,128.0 - mat.shinnes);
+	else
+		outColor = AskikhmininShirleyAnizotropidLight(0,inoutPosition,-normal,tangent,bitangent, mat.diffuse, mat.specular, mat.ambient, mat.emmision, 0.75,0.25, mat.shinnes,128.0 - mat.shinnes);
+	/*if(gl_FrontFacing==true)
+		outColor = StraussLight(0,inoutPosition,normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,mat.shinnes/296.0,1.0 - mat.shinnes/296.0,0.1);
+	else
+		outColor = StraussLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,mat.shinnes/296.0,1.0 - mat.shinnes/296.0,0.1);*/
+	/*if(gl_FrontFacing==true)
+		outColor = WardIzotropicLight(0,inoutPosition,normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.25 + mat.shinnes/768.0);
+	else
+		outColor = WardIzotropicLight(0,inoutPosition,-normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.25 + mat.shinnes/768.0f);*/
+	/*if(gl_FrontFacing==true)
+		outColor = WardAnizotropicLight(0,inoutPosition,tangent,bitangent,normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.25+mat.shinnes/768.0,0.05+mat.shinnes/768.0);
+	else
+		outColor = WardAnizotropicLight(0,inoutPosition,tangent,bitangent,-normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.25+mat.shinnes/768.0,0.05+mat.shinnes/768.0);*/
+
+
+	/*if(gl_FrontFacing==true)
 		outColor = CookTorranceLight(0,inoutPosition,normal,mat.diffuse,mat.ambient,mat.specular,mat.emmision,0.25,1.0);
 	else
-		outColor = CookTorranceLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.specular,mat.emmision,0.25,1.0);
+		outColor = CookTorranceLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.specular,mat.emmision,0.25,1.0);*/
+	/*if(gl_FrontFacing==true)
+		outColor = AskikhmininShirleyIzotropidLight(0,inoutPosition,normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.75,0.25,mat.shinnes);
+	else
+		outColor = AskikhmininShirleyIzotropidLight(0,inoutPosition,-normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.75,0.25,mat.shinnes);*/
 }
 
 

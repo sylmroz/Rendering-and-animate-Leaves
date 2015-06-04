@@ -21,11 +21,11 @@ const int MaxLight = 8;
 uniform LightParametrs Light[MaxLight] = LightParametrs[MaxLight]
 	(
 		LightParametrs(
-			vec4 (0.0,0.0,0.0,1.0),
-			vec4 (0.5,0.5,0.5,1.0),
-			vec4 (0.5,0.5,0.5,1.0),
-			vec4 (0.5,0.5,0.5,1.0),
-			vec3 (0.0,0.0,-1.0),
+			vec4( 0.0, 0.0, 0.0, 1.0 ),
+            vec4( 1.0, 1.0, 1.0, 1.0 ),
+            vec4( 1.0, 1.0, 1.0, 1.0 ),
+            vec4( 0.0, 0.0, 1.0, 0.0 ),
+            vec3( 0.0, 0.0, -1.0 ),
 			180.0,
 			0.0,
 			0.2,
@@ -282,6 +282,9 @@ vec4 BlinPhongDirectionalLight(const int number,const vec3 position, const vec3 
 	{
 		vec3 H=normalize(Light[number].position.xyz+normalize(EyePosition.xyz-position));
 		float NdotH=max(dot(normal,H),0.0);
+
+
+
 
 
 
@@ -651,7 +654,7 @@ vec4 StraussDirectionalLight(const int number,const vec3 position, const vec3 no
 		vec3 Cs=vec3(1.0,1.0,1.0)+m*(1-Fersnel(NdotL))*(Light[number].specular.rgb*specular.rgb-vec3(1.0,1.0,1.0));
 		vec3 D = NdotL*(1-m*s)*(1-sm)*(1-t)*Light[number].diffuse.rgb*diffuse.rgb;
 		vec3 S = max( vec3( 0.0 ), Cs * Ref * pow( dot( R, Eye ), 3.0 / (1.0 - s) ) );
-		vec4 I = vec4(2.5*D + 1.5*S,1.0);
+		vec4 I = vec4(0.2*D + S,1.0);
 		return I;
 	}
 	else
@@ -741,15 +744,15 @@ vec4 StraussLight(const int number,const vec3 position, const vec3 normal,const 
 vec4 WardDirectionalIzotropicLight(const int number,const vec3 position,const vec3 normal,const vec4 diffuse,const vec4 specular,const float sigma)
 {
 	float NdotL = dot( normal,Light[number].position.xyz);
-	if(NdotL>0)
+	vec3 Eye = normalize(EyePosition.xyz-position);
+	float NdotE = dot(normal,Eye);
+	if(NdotL>0.0 && NdotE!=0.0)
 	{
-		vec3 Eye = normalize(EyePosition.xyz-position);
 		vec3 H = normalize(Light[number].position.xyz+Eye);
-		float NdotH = max(dot(normal,H),0.0);
-		float NdotE = max(dot(normal,Eye),0.0);
+		float NdotH = dot(normal,H);
 		float sig=sigma*sigma;
-		float Is=(exp((-pow(tan(acos(NdotH)),2.0))/(sig)))/(4.0*pi*sig*sqrt(NdotE*NdotL));
-		return NdotL*Light[number].diffuse*diffuse + Light[number].specular*specular*Is;
+		float Is=(exp((-2*pow(tan(acos(NdotH)),2.0))/(sig)))/(4.0*pi*sig*sqrt(NdotE*NdotL));
+		return NdotL*Light[number].diffuse*diffuse*0.2 + 2.5*Is*Light[number].specular*specular;
 	}
 	else 
 		return vec4(0.0,0.0,0.0,1.0);
@@ -768,9 +771,9 @@ vec4 WardPointIzotropicLight(const int number,const vec3 position,const vec3 nor
 		float NdotH = max(dot(normal,H),0.0);
 		float NdotE = max(dot(normal,Eye),0.0);
 		float sig=sigma*sigma;
-		float Is=(exp((-pow(tan(acos(NdotH)),2.0))/(sig)))/(4.0*pi*sig*sqrt(NdotE*NdotL));
+		float Is=(exp((-2*pow(tan(acos(NdotH)),2.0))/(sig)))/(4.0*pi*sig*sqrt(NdotE*NdotL));
 		float att = 1/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
-		return att * (LocalAmbientLight(number,ambient)+ NdotL*Light[number].diffuse*diffuse + Light[number].specular*specular*Is);
+		return att * (LocalAmbientLight(number,ambient)*ambient*0.2+ 2.5*NdotL*Light[number].diffuse*diffuse + Light[number].specular*specular*Is);
 	}
 	else 
 		return vec4(0.0,0.0,0.0,1.0);
@@ -792,10 +795,10 @@ vec4 WardSpotIzotropicLight(const int number,const vec3 position,const vec3 norm
 			float NdotH = max(dot(normal,H),0.0);
 			float NdotE = max(dot(normal,Eye),0.0);
 			float sig=sigma*sigma;
-			float Is=(exp((-pow(tan(acos(NdotH)),2.0))/(sig)))/(4.0*pi*sig*sqrt(NdotE*NdotL));
+			float Is=(exp((-2*pow(tan(acos(NdotH)),2.0))/(sig)))/(4.0*pi*sig*sqrt(NdotE*NdotL));
 			spot = pow(spot,Light[number].SpotExponent);
 			float att = spot/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
-			return att * (LocalAmbientLight(number,ambient)+ NdotL*Light[number].diffuse*diffuse + Light[number].specular*specular*Is);
+			return att * (LocalAmbientLight(number,ambient)*ambient+ 0.2*NdotL*Light[number].diffuse*diffuse + 4.5*Light[number].specular*specular*Is);
 		}
 		else
 			return vec4(0.0,0.0,0.0,1.0);
@@ -830,7 +833,7 @@ vec4 WardAnizotropicDirectionalLight(const int number,const vec3 position,const 
 		const float NdotH = dot(normal,H);
 		const float A = exp(-2*((HdotT/sigmax)*(HdotT/sigmax)+(HdotB/sigmay)*(HdotB/sigmay))/(1+NdotH));
 		const float Is = A/(4*pi*sigmax*sigmay*sqrt(NdotE*NdotL));
-		return NdotL*Light[number].diffuse*diffuse + Light[number].specular*specular*Is;  
+		return 0.2*NdotL*Light[number].diffuse*diffuse + 1.5*Light[number].specular*specular*Is;  
 	}
 	else
 		return vec4(0.0,0.0,0.0,1.0);
@@ -853,7 +856,7 @@ vec4 WardAnizotropicPointLight(const int number,const vec3 position,const vec3 t
 		const float A = exp(-2*((HdotT/sigmax)*(HdotT/sigmax)+(HdotB/sigmay)*(HdotB/sigmay))/(1+NdotH));
 		const float Is = A/(4*pi*sigmax*sigmay*sqrt(NdotE*NdotL));
 		float att = 1/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
-		return att * (LocalAmbientLight(number,ambient) + NdotL*Light[number].diffuse*diffuse + Light[number].specular*specular*Is);  
+		return att * (LocalAmbientLight(number,ambient)*ambient + 0.2*NdotL*Light[number].diffuse*diffuse + 1.5*Light[number].specular*specular*Is);  
 	}
 	else
 		return vec4(0.0,0.0,0.0,1.0);
@@ -872,7 +875,7 @@ vec4 WardAnizotropicSpotLight(const int number,const vec3 position,const vec3 ta
 		float spot = dot(Light[number].SpotDirection,-LV);
 		if(spot>cos(radians(Light[number].SpotCuttof)))
 		{
-			const vec3 H = normalize(Light[number].position.xyz+Eye);
+			const vec3 H = normalize(LV+Eye);
 			const float HdotT = dot(tangent,H);
 			const float HdotB = dot(bitangent,H);
 			const float NdotH = dot(normal,H);
@@ -880,7 +883,7 @@ vec4 WardAnizotropicSpotLight(const int number,const vec3 position,const vec3 ta
 			const float Is = A/(4*pi*sigmax*sigmax*sqrt(NdotE*NdotL));
 			spot = pow(spot,Light[number].SpotExponent);
 			float att = spot/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
-			return att * (LocalAmbientLight(number,ambient)+ NdotL*Light[number].diffuse*diffuse + Light[number].specular*specular*Is);  
+			return att * (LocalAmbientLight(number,ambient)*ambient+ 0.2*NdotL*Light[number].diffuse*diffuse + 1.5*Light[number].specular*specular*Is);  
 		}
 		else
 			return vec4(0.0,0.0,0.0,1.0);	
@@ -889,7 +892,7 @@ vec4 WardAnizotropicSpotLight(const int number,const vec3 position,const vec3 ta
 		return vec4(0.0,0.0,0.0,1.0);
 }
 
-vec4 WardAnizotropicSpotLight(const int number, const vec3 position, const vec3 tangent, const vec3 bitangent, const vec3 normal, const vec4 diffuse, const vec4 specular, const vec4 ambient,const vec4 emmision, const float sigmax, const float sigmay)
+vec4 WardAnizotropicLight(const int number, const vec3 position, const vec3 tangent, const vec3 bitangent, const vec3 normal, const vec4 diffuse, const vec4 specular, const vec4 ambient,const vec4 emmision, const float sigmax, const float sigmay)
 {
 	if(Light[number].position.w==0.0)
 		return GlobalAmbientLight(ambient) + LocalAmbientLight(number,ambient) + WardAnizotropicDirectionalLight(number, position, tangent, bitangent, normal, diffuse, specular, sigmax, sigmay) + emmision;
@@ -901,6 +904,218 @@ vec4 WardAnizotropicSpotLight(const int number, const vec3 position, const vec3 
 			return GlobalAmbientLight(ambient) + WardAnizotropicSpotLight(number, position, tangent, bitangent, normal, diffuse, specular, emmision, sigmax, sigmay) + emmision; + emmision;
 	}
 }
+
+vec4 AskikhmininShirleyIzotropidDirectionalLight(const int number,const vec3 position,const vec3 normal,const vec4 diffuse, const vec4 specular,const float Rd, const float Rs, const float n)
+{
+	/*float NdotL = max(dot(normal,Light[number].position.xyz),0.0);
+	if(NdotL>0)
+	{
+		vec3 Eye = normalize(EyePosition.xyz-position);
+		vec3 H = normalize(Light[number].position.xyz+Eye);
+		float HdotL = dot(H,Light[number].position.xyz);
+		float NdotH = dot(normal,H);
+		float NdotE = dot(normal,Eye);
+		float F = Rs + pow(1.0 - HdotL,5.0)*(1.0 - Rs);
+		float Is = F*((n+1.0)*pow(NdotH,n))/(8.0*pi*HdotL*max(NdotL,NdotE));
+		float Id = 28.0*Rd*(1.0-Rs)*(1.0-pow(1.0-(NdotL/2.0),5.0))*(1.0-pow(1.0-(NdotE/2.0),5.0))/(23.0*pi);
+
+		return 5.5*NdotL*Id*Light[number].diffuse*diffuse + 7.5*Light[number].specular*specular*Is;
+	}
+	else
+		return vec4(0.0,0.0,0.0,1.0);*/
+	float NdotL = max(dot(normal,Light[number].position.xyz),0.0);
+	if(NdotL>0)
+	{
+		vec3 Eye = normalize(EyePosition.xyz-position);
+		vec3 H = normalize(Light[number].position.xyz+Eye);
+		float HdotL = dot(H,Light[number].position.xyz);
+		float NdotH = dot(normal,H);
+		float NdotE = dot(normal,Eye);
+		float F = Rs + pow(1.0 - HdotL,5.0)*(1.0 - Rs);
+		float Is = F*((n+1.0)*pow(NdotH,n))/(8.0*pi*HdotL*max(NdotL,NdotE));
+		float Id = 28.0*Rd*(1.0-Rs)*(1.0-pow(1.0-(NdotL/2.0),5.0))*(1.0-pow(1.0-(NdotE/2.0),5.0))/(23.0*pi);
+
+		//float att = 1/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
+		return 5.5*NdotL*Id*Light[number].diffuse*diffuse + 7.5*Light[number].specular*specular*Is;
+	}
+	else
+		return vec4(0.0,0.0,0.0,1.0);
+
+}
+
+vec4 AskikhmininShirleyIzotropidPointLight(const int number,const vec3 position,const vec3 normal,const vec4 diffuse, const vec4 specular,const vec4 ambient,const float Rd, const float Rs, const float n)
+{
+	vec3 LV=Light[number].position.xyz-position;
+	float distance = length(LV);
+	LV = normalize(LV);
+	float NdotL = max(dot(normal,LV),0.0);
+	if(NdotL>0)
+	{
+		vec3 Eye = normalize(EyePosition.xyz-position);
+		vec3 H = normalize(LV+Eye);
+		float HdotL = dot(H,LV);
+		float NdotH = max(dot(normal,H),0.0);
+		float NdotE = max(dot(normal,Eye),0.0);
+		float F = Rs + pow(1.0 - HdotL,5.0)*(1.0 - Rs);
+		float Is = F*((n+1.0)*pow(NdotH,n))/(8.0*pi*HdotL*max(NdotL,NdotE));
+		float Id = 28.0*Rd*(1.0-Rs)*(1.0-pow(1.0-(NdotL/2.0),5.0))*(1.0-pow(1.0-(NdotE/2.0),5.0))/(23.0*pi);
+		float att = 1/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
+		return att*(LocalAmbientLight(number,ambient)*ambient + 5.5*NdotL*Id*Light[number].diffuse*diffuse + 7.5*Light[number].specular*specular*Is);
+	}
+	else
+		return vec4(0.0,0.0,0.0,1.0);
+}
+
+vec4 AskikhmininShirleyIzotropidSpotLight(const int number,const vec3 position,const vec3 normal,const vec4 diffuse, const vec4 specular,const vec4 ambient,const float Rd, const float Rs, const float n)
+{
+	vec3 LV=Light[number].position.xyz-position;
+	float distance = length(LV);
+	LV = normalize(LV);
+	float NdotL = max(dot(normal,LV),0.0);
+	if(NdotL>0)
+	{
+		float spot = dot(Light[number].SpotDirection,-LV);
+		if(spot>cos(radians(Light[number].SpotCuttof)))
+		{
+			vec3 Eye = normalize(EyePosition.xyz-position);
+			vec3 H = normalize(LV+Eye);
+			float NdotH = max(dot(normal,H),0.0);
+			float NdotE = max(dot(normal,Eye),0.0);
+			float F = Rs + pow(1.0 - NdotL,5.0)*(1.0 - Rs);
+			float Is = F*((n+1.0)*pow(NdotH,n))/(8.0*pi*NdotL*max(NdotL,NdotE));
+			float Id = 28.0*Rd*(1.0-Rs)*(1.0-pow(1.0-(NdotL/2.0),5.0))*(1.0-pow(1.0-(NdotE/2.0),5.0))/(23.0*pi);
+		
+			spot = pow(spot,Light[number].SpotExponent);
+			float att = spot/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
+			return att*(LocalAmbientLight(number,ambient)*ambient + 5.5*NdotL*Id*Light[number].diffuse*diffuse + 7.5*Light[number].specular*specular*Is);
+		}
+		else
+			return vec4(0.0,0.0,0.0,1.0);
+	}
+	else
+		return vec4(0.0,0.0,0.0,1.0);
+}
+
+vec4 AskikhmininShirleyIzotropidLight(const int number, const vec3 position, const vec3 normal, const vec4 diffuse, const vec4 specular, const vec4 ambient,const vec4 emmision,const float Rd, const float Rs, const float n)
+{
+	if(Light[number].position.w==0.0)
+		return GlobalAmbientLight(ambient) + LocalAmbientLight(number,ambient) + AskikhmininShirleyIzotropidDirectionalLight(number,position,normal,diffuse, specular, Rd, Rs, n) + emmision;
+	else
+	{
+		if(Light[number].SpotCuttof==180.0)
+			return GlobalAmbientLight(ambient) + AskikhmininShirleyIzotropidPointLight(number,position,normal,diffuse,specular,ambient,Rd,Rs,n) + emmision;		
+		else
+			return GlobalAmbientLight(ambient) + AskikhmininShirleyIzotropidSpotLight(number,position,normal,diffuse,specular,ambient,Rd,Rs,n) + emmision; + emmision;
+	}
+}
+
+vec4 AskikhmininShirleyAnizotropidDirectionalLight(const int number, const vec3 position, const vec3 normal,const vec3 tangent, const vec3 bitangent, const vec4 diffuse, const vec4 specular, const float Rd, const float Rs, const float nx, const float ny)
+{
+	vec3 LV=Light[number].position.xyz-position;
+	float distance = length(LV);
+	LV = normalize(LV);
+	float NdotL = max(dot(normal,LV),0.0);
+	if(NdotL>0)
+	{
+		vec3 Eye = normalize(EyePosition.xyz-position);
+		vec3 H = normalize(LV+Eye);
+		float HdotL = dot(H,LV);
+		float NdotH = max(dot(normal,H),0.0);
+		float NdotE = max(dot(normal,Eye),0.0);
+		float TdotH = dot(tangent,H);
+		float BdotH = dot(bitangent,H);
+		float F = Rs + pow(1.0 - HdotL,5.0)*(1.0 - Rs);
+		float Is = F*(sqrt((nx+1)*(ny+1))*pow(NdotH,((nx*pow(TdotH,2) + ny*pow(BdotH,2))/(1-pow(NdotH,2)))))/(8.0*pi*HdotL*max(NdotL,NdotE));
+		float Id = 28.0*Rd*(1.0-Rs)*(1.0-pow(1.0-(NdotL/2.0),5.0))*(1.0-pow(1.0-(NdotE/2.0),5.0))/(23.0*pi);
+		return 5.5*NdotL*Id*Light[number].diffuse*diffuse + 7.5*Light[number].specular*specular*Is;
+	}
+	else
+		return vec4(0.0,0.0,0.0,1.0);
+}
+
+vec4 AskikhmininShirleyAnizotropicPointLight(const int number, const vec3 position, const vec3 normal,const vec3 tangent, const vec3 bitangent, const vec4 diffuse, const vec4 specular,const vec4 ambient, const float Rd, const float Rs, const float nx, const float ny)
+{
+	vec3 LV=Light[number].position.xyz-position;
+	float distance = length(LV);
+	LV = normalize(LV);
+	float NdotL = max(dot(normal,LV),0.0);
+	if(NdotL>0)
+	{
+		vec3 Eye = normalize(EyePosition.xyz-position);
+		vec3 H = normalize(LV+Eye);
+		float HdotL = dot(H,LV);
+		float NdotH = max(dot(normal,H),0.0);
+		float NdotE = max(dot(normal,Eye),0.0);
+		float TdotH = dot(tangent,H);
+		float BdotH = dot(bitangent,H);
+		float F = Rs + pow(1.0 - HdotL,5.0)*(1.0 - Rs);
+		float Is = F*(sqrt((nx+1)*(ny+1))*pow(NdotH,((nx*pow(TdotH,2) + ny*pow(BdotH,2))/(1-pow(NdotH,2)))))/(8.0*pi*HdotL*max(NdotL,NdotE));
+		float Id = 28.0*Rd*(1.0-Rs)*(1.0-pow(1.0-(NdotL/2.0),5.0))*(1.0-pow(1.0-(NdotE/2.0),5.0))/(23.0*pi);
+		float att = 1/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
+		return att*(LocalAmbientLight(number,ambient)*ambient + 5.5*NdotL*Id*Light[number].diffuse*diffuse + 7.5*Light[number].specular*specular*Is);
+	}
+	else
+		return vec4(0.0,0.0,0.0,1.0);
+}
+
+vec4 AskikhmininShirleyAnizotropicSpotLight(const int number, const vec3 position, const vec3 normal,const vec3 tangent, const vec3 bitangent, const vec4 diffuse, const vec4 specular,const vec4 ambient, const float Rd, const float Rs, const float nx, const float ny)
+{
+	vec3 LV=Light[number].position.xyz-position;
+	float distance = length(LV);
+	LV = normalize(LV);
+	float NdotL = max(dot(normal,LV),0.0);
+	if(NdotL>0)
+	{
+		float spot = dot(Light[number].SpotDirection,-LV);
+		if(spot>cos(radians(Light[number].SpotCuttof)))
+		{
+			vec3 Eye = normalize(EyePosition.xyz-position);
+			vec3 H = normalize(LV+Eye);
+			float HdotL = dot(H,LV);
+			float NdotH = max(dot(normal,H),0.0);
+			float NdotE = max(dot(normal,Eye),0.0);
+			float TdotH = dot(tangent,H);
+			float BdotH = dot(bitangent,H);
+			float F = Rs + pow(1.0 - HdotL,5.0)*(1.0 - Rs);
+			float Is = F*(sqrt((nx+1)*(ny+1))*pow(NdotH,((nx*pow(TdotH,2) + ny*pow(BdotH,2))/(1-pow(NdotH,2)))))/(8.0*pi*NdotL*max(NdotL,NdotE));
+			float Id = 28.0*Rd*(1.0-Rs)*(1.0-pow(1.0-(NdotL/2.0),5.0))*(1.0-pow(1.0-(NdotE/2.0),5.0))/(23.0*pi);
+			spot = pow(spot,Light[number].SpotExponent);
+			float att = spot/(Light[number].ConstantAttention + Light[number].LinearAttention * distance + Light[number].QuadratureAttention * distance * distance);
+			return att*(LocalAmbientLight(number,ambient)*ambient + 5.5*NdotL*Id*Light[number].diffuse*diffuse + 7.5*Light[number].specular*specular*Is);
+		}
+		else
+			return vec4(0.0,0.0,0.0,1.0);	
+	}
+	else
+		return vec4(0.0,0.0,0.0,1.0);
+}
+
+vec4 AskikhmininShirleyAnizotropidLight(const int number, const vec3 position, const vec3 normal,const vec3 tangent, const vec3 bitangent, const vec4 diffuse, const vec4 specular,const vec4 ambient,const vec4 emmision, const float Rd, const float Rs, const float nx, const float ny)
+{
+	if(Light[number].position.w==0.0)
+		return GlobalAmbientLight(ambient) + LocalAmbientLight(number,ambient) + AskikhmininShirleyAnizotropidDirectionalLight(number,  position, normal, tangent, bitangent, diffuse, specular, Rd, Rs, nx, ny) + emmision;
+	else
+	{
+		if(Light[number].SpotCuttof==180.0)
+			return GlobalAmbientLight(ambient) + AskikhmininShirleyAnizotropicPointLight(number, position, normal, tangent, bitangent, diffuse, specular, ambient, Rd, Rs, nx, ny) + emmision;		
+		else
+			return GlobalAmbientLight(ambient) + AskikhmininShirleyAnizotropicSpotLight(number, position, normal, tangent, bitangent, diffuse, specular, ambient, Rd, Rs, nx, ny) + emmision; + emmision;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

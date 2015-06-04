@@ -34,6 +34,7 @@ int main()
 	GLuint program;
 	//shader::AttachShader(program, sh);
 	shader::AttachFragmentShader(program, "./res/lights.glsl");
+	shader::AttachVertexShader(program, "./res/lights.glsl");
 	shader::AttachVertexShader(program, "./res/blinphong.vs");
 	shader::AttachFragmentShader(program, "./res/blinphong.fs");
 	shader::LinkProgram(program);
