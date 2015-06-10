@@ -181,7 +181,7 @@ Mesh::Mesh(const std::string& FileName)
 		CreateBuffer<glm::vec4>(0, 4, obj.v);
 	if (obj.vn.size())
 		CreateBuffer<glm::vec3>(1, 3, obj.vn);
-	if(obj.vt.size())
+	if (obj.vt.size())
 		CreateBuffer<glm::vec4>(2, 4, obj.vt);
 	if (obj.indices.size())
 	{

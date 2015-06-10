@@ -41,6 +41,7 @@ void OBJLoader::AddFace(std::istringstream &txt, const std::vector<glm::vec4>& v
 	txt.seekg(2, std::ios::beg);
 	while (!txt.eof() && txt.peek()!=EOF && txt.peek() !='\x0D' )
 	{
+		//std::cout << txt.str() << "\n";
 		vector4<GLint> fvtnm(-1, -1, -1, matId);
 		txt >> fvtnm.x;
 		--fvtnm.x;
@@ -115,12 +116,14 @@ bool OBJLoader::LoadFile(const std::string& FileName)
 			txt >> str;
 			if (str == "v")
 			{
+				
 				glm::vec4 temp(0.0f, 0.0f, 0.0f, 1.0f);
 				txt >> temp.x >> temp.y >> temp.z >> temp.w;
 				vtemp.push_back(temp);
 			}
 			else if (str == "vt")
 			{
+				
 				glm::vec4 temp(0.0f, 0.0f, 0.0f, 1.0f);
 				txt >> temp.x >> temp.y >> temp.z >> temp.w;
 				vttemp.push_back(temp);
@@ -132,7 +135,9 @@ bool OBJLoader::LoadFile(const std::string& FileName)
 				vntemp.push_back(temp);
 			}
 			else if (str == "f")
+			{
 				AddFace(txt, vtemp, vttemp, vntemp, indextemp, matId);
+			}
 			else if (str == "mtllib")
 			{
 				while (!txt.eof())

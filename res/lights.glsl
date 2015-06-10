@@ -282,13 +282,6 @@ vec4 BlinPhongDirectionalLight(const int number,const vec3 position, const vec3 
 	{
 		vec3 H=normalize(Light[number].position.xyz+normalize(EyePosition.xyz-position));
 		float NdotH=max(dot(normal,H),0.0);
-
-
-
-
-
-
-
 		return NdotL*Light[number].diffuse*diffuse+Light[number].specular*specular*pow(NdotH,shinnes);
 	}
 	else

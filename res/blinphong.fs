@@ -29,6 +29,10 @@ vec4 AskikhmininShirleyAnizotropidLight(const int number, const vec3 position, c
 
 in vec3 inoutPosition;
 in vec3 inoutNormal;
+in vec2 inoutTexCoord;
+
+uniform sampler2D diffuse1;
+uniform sampler2D diffuse2;
 
 out vec4 outColor;
 
@@ -48,11 +52,13 @@ void main()
 	tangent -= NdotT*normal;
 	tangent = normalize(tangent);
 	vec3 bitangent = cross(tangent,normal);
-
+	vec4 color1 = texture2D(diffuse1,inoutTexCoord);
+	vec4 color2 = texture2D(diffuse2,inoutTexCoord);
+	//vec4 color3 = mix(color1,color2,0.5);
 	if(gl_FrontFacing==true)
-		outColor = AskikhmininShirleyAnizotropidLight(0,inoutPosition,normal,tangent,bitangent, mat.diffuse, mat.specular, mat.ambient, mat.emmision, 0.75,0.25, mat.shinnes,128.0 - mat.shinnes);
+		outColor = AskikhmininShirleyAnizotropidLight(0,inoutPosition,normal,tangent,bitangent,mat.diffuse, mat.specular, mat.ambient, mat.emmision, 0.75,0.25, mat.shinnes,128.0 - mat.shinnes);
 	else
-		outColor = AskikhmininShirleyAnizotropidLight(0,inoutPosition,-normal,tangent,bitangent, mat.diffuse, mat.specular, mat.ambient, mat.emmision, 0.75,0.25, mat.shinnes,128.0 - mat.shinnes);
+		outColor = AskikhmininShirleyAnizotropidLight(0,inoutPosition,-normal,tangent,bitangent,mat.diffuse, mat.specular, mat.ambient, mat.emmision, 0.75,0.25, mat.shinnes,128.0 - mat.shinnes);
 	/*if(gl_FrontFacing==true)
 		outColor = StraussLight(0,inoutPosition,normal,mat.diffuse,mat.ambient,mat.emmision,mat.specular,mat.shinnes/296.0,1.0 - mat.shinnes/296.0,0.1);
 	else

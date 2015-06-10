@@ -16,8 +16,8 @@ public:
 	GLuint LoadTexture(const std::string& FileName);
 	std::vector<GLuint> LoadTexture(const std::vector<std::string>& textures);
 	void BindTexture();
-	void BindTexture(unsigned int index,const char* materialname);
-	void BindArrayTextures(const std::vector<const char*> texturename);
+	void BindTexture(unsigned int index, const char* materialname, GLuint& program);
+	void BindArrayTextures(const std::vector<const char*> texturename, GLuint& program);
 	~Texture();
 protected:
 private:

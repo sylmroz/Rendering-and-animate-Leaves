@@ -8,6 +8,7 @@
 #include "mat.h"
 #include "OBJLoader.h"
 #include "transform.h"
+#include "texture.h"
 float deCasteliau(std::vector<float> p,float t);
 
 int main()
@@ -50,8 +51,10 @@ int main()
 	
 	//std::vector<glm::vec3> p;
 	//MatLoader mat("./res/materal.mat");
-	Mesh obj("./res/uchati.obj");
-	
+	Mesh obj("./res/monkey3.obj");
+	std::vector<std::string> texurefile = { "./res/BrickOldOvergrown0018_1_S.jpg", "./res/Beech_Leaf_0001_diffuse.jpg" };
+	std::vector<const char*> texturename = { "diffuse1", "diffuse2" };
+	Texture tex(texurefile);
 	//OBJLoader object("./res/teapot.obj");
 	/*Interpolations *inter=new Langrage;
 	Hermite H;
@@ -126,8 +129,10 @@ int main()
 	glEnable(GL_CLIP_DISTANCE0);*/
 	glBindAttribLocation(program, 0, "positions");
 	glBindAttribLocation(program, 1, "normals");
+	glBindAttribLocation(program, 2, "texCoord");
 	Transform transform;
-	transform.SetScale(glm::vec3(0.5f,0.5f,0.5f));
+	//transform.SetScale(glm::vec3(0.5f,0.5f,0.5f));
+	//transform.SetPos(glm::vec3(0.0, -12.0 , 0.0));
 	//glm::vec4 LightPosition(0.0, 0.0, 5.0, 1.0);
 	glEnable(GL_DEPTH_TEST);
 	while (!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS)
@@ -149,7 +154,7 @@ int main()
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(modelView3x3));
 		glm::mat4 mvinv = glm::inverse(v*m);
 		//Eye = mvinv*Eye;
-		glm::vec4 LightPosition = glm::vec4(6.0f, 6.0f, 6.0f,0.0f);
+		glm::vec4 LightPosition = glm::vec4(0.0f, 0.0f, 6.0f,0.0f);
 		//LightPosition = mvinv*LightPosition;
 		//LightPosition = glm::normalize(LightPosition);
 
@@ -159,6 +164,7 @@ int main()
 		glUniformMatrix3fv(glGetUniformLocation(program, "normalMatrix"), 1, GL_FALSE, &normalMatrix[0][0]);
 		glUniform4fv(glGetUniformLocation(program, "Eye"), 1, &Eye[0]);
 		glUniform4fv(glGetUniformLocation(program, "Light[0].position"), 1, &LightPosition[0]);
+		tex.BindArrayTextures(texturename, program);
 		//glUniform4fv(glGetUniformLocation(program, "LightPosition"), 1, &LightPosition[0]);
 		//glUniformMatrix4fv(MVP, 1, GL_FALSE, &mvp[0][0]);
 		/*glUniform4fv(glGetUniformLocation(program, "clipPlane[0]"), 1, clipPlaneLeft);
