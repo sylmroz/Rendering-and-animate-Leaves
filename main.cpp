@@ -35,7 +35,7 @@ int main()
 	GLuint program;
 	//shader::AttachShader(program, sh);
 	shader::AttachFragmentShader(program, "./res/lights.glsl");
-	shader::AttachVertexShader(program, "./res/lights.glsl");
+	//shader::AttachVertexShader(program, "./res/lights.glsl");
 	shader::AttachVertexShader(program, "./res/blinphong.vs");
 	shader::AttachFragmentShader(program, "./res/blinphong.fs");
 	shader::LinkProgram(program);
@@ -51,8 +51,8 @@ int main()
 	
 	//std::vector<glm::vec3> p;
 	//MatLoader mat("./res/materal.mat");
-	Mesh obj("./res/monkey3.obj");
-	std::vector<std::string> texurefile = { "./res/BrickOldOvergrown0018_1_S.jpg", "./res/Beech_Leaf_0001_diffuse.jpg" };
+	Mesh obj("./res/uchati.obj");
+	std::vector<std::string> texurefile = { "./res/leaf/DiffuseMap.png", "./res/leaf/SpecularMap.png" };
 	std::vector<const char*> texturename = { "diffuse1", "diffuse2" };
 	Texture tex(texurefile);
 	//OBJLoader object("./res/teapot.obj");
@@ -131,7 +131,7 @@ int main()
 	glBindAttribLocation(program, 1, "normals");
 	glBindAttribLocation(program, 2, "texCoord");
 	Transform transform;
-	//transform.SetScale(glm::vec3(0.5f,0.5f,0.5f));
+	transform.SetScale(glm::vec3(0.5f,0.5f,0.5f));
 	//transform.SetPos(glm::vec3(0.0, -12.0 , 0.0));
 	//glm::vec4 LightPosition(0.0, 0.0, 5.0, 1.0);
 	glEnable(GL_DEPTH_TEST);
@@ -142,8 +142,8 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 		
-		transform.SetRot(glm::vec3(rotate, rotate, rotate));
-		//transform.SetPos(glm::vec3(-rotate+3, 0, 0));
+		transform.SetRot(glm::vec3(rotate,rotate,rotate));
+		transform.SetPos(glm::vec3(0, -0.5, 0));
 		glUseProgram(program);
 		glm::mat4 v =camera.GetVievMatrix();
 		glm::mat4 P = camera.GetProjectionMatrix();
@@ -154,7 +154,7 @@ int main()
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(modelView3x3));
 		glm::mat4 mvinv = glm::inverse(v*m);
 		//Eye = mvinv*Eye;
-		glm::vec4 LightPosition = glm::vec4(0.0f, 0.0f, 6.0f,0.0f);
+		glm::vec4 LightPosition = glm::vec4(0.0f, 0.0f, 5.0f,0.0f);
 		//LightPosition = mvinv*LightPosition;
 		//LightPosition = glm::normalize(LightPosition);
 

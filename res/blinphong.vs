@@ -5,7 +5,7 @@ uniform mat3 normalMatrix;
 
 layout (location = 0) in vec4 inPosition;
 layout (location = 1) in vec3 inNormal;
-layout (location = 1) in vec4 inTexCoord;
+layout (location = 2) in vec4 inTexCoord;
 
 out vec3 inoutPosition;
 out vec3 inoutNormal;

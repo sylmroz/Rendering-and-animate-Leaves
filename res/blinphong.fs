@@ -42,10 +42,10 @@ void main()
 	MaterialParametrs mat=MaterialParametrs
 			(
 				vec4( 0.0, 0.0, 0.0, 1.0 ),
-                vec4( 0.0, 0.0, 0.0,  1.000000 ),
-                vec4( 0.5, 0.5, 0.0, 1.000000 ),
-                vec4( 0.60, 0.60, 0.50, 1.000000 ),
-                32.0
+                        vec4( 0.135000, 0.222500, 0.157500, 0.950000 ),
+                        vec4( 0.540000, 0.890000, 0.630000, 0.950000 ),
+                        vec4( 0.316228, 0.316228, 0.316228, 0.950000 ),
+                        12.8
 			);
 	vec3 tangent = vec3(1.0,0.0,0.0);
 	float NdotT = dot(normal,tangent);
@@ -74,28 +74,18 @@ void main()
 
 
 	/*if(gl_FrontFacing==true)
-		outColor = CookTorranceLight(0,inoutPosition,normal,mat.diffuse,mat.ambient,mat.specular,mat.emmision,0.25,1.0);
+		outColor = CookTorranceLight(0,inoutPosition,normal,mat.diffuse,mat.ambient,mat.specular,mat.emmision,mat.shinnes/1569.0,1.0-mat.shinnes/128.0);
 	else
-		outColor = CookTorranceLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.specular,mat.emmision,0.25,1.0);*/
+		outColor = CookTorranceLight(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.specular,mat.emmision,mat.shinnes/1569.0,1.0-mat.shinnes/128.0);*/
+	
 	/*if(gl_FrontFacing==true)
 		outColor = AskikhmininShirleyIzotropidLight(0,inoutPosition,normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.75,0.25,mat.shinnes);
 	else
 		outColor = AskikhmininShirleyIzotropidLight(0,inoutPosition,-normal,mat.diffuse,mat.specular,mat.ambient,mat.emmision,0.75,0.25,mat.shinnes);*/
+	/*if(gl_FrontFacing==true)
+		outColor = OrenNayarLighting(0,inoutPosition,normal,mat.diffuse,mat.ambient,mat.emmision,0.2);
+	else
+		outColor = OrenNayarLighting(0,inoutPosition,-normal,mat.diffuse,mat.ambient,mat.emmision,0.2);*/
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
